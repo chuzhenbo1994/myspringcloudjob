@@ -1,0 +1,7 @@
+server:
+  port: 8983
+
+spring:
+  cloud:
+    zookeeper:
+      connect-string:  localhost:2222

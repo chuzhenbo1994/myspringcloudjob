@@ -1,0 +1,45 @@
+version: '3.5'
+services:
+  # 注册中心
+  register-center:
+    image: eurekaservice
+    container_name: eurekaservice
+    restart: always
+    #挂载一个目录或者一个已存在的数据卷容器。格式为宿主机目录：容器内目录
+    volumes:
+      - $PWD/var/lib/docker/mydockertext/springcloudComposetest/eservice
+    ports:
+      - "8762:8762"
+    command: java -Djava.security.egd=file:/dev/./urandom -jar  demo-0.0.1-snapshot.jar app.jar
+
+
+  config-center:
+    image: configservice
+    container_name: configservice
+    restart: always
+    volumes:
+      - $PWD/var/lib/docker/mydockertext/springcloudComposetest/configservice
+    ports:
+      - "8763:8763"
+    command: java -Djava.security.egd=file:/dev/./urandom -jar configserver-0.0.1-snapshot.jar app.jar
+    depends_on:
+      - register-center
+    links:
+      - register-center:eurekaservice
+
+    #网关服务
+  gateway:
+    image: zuulservice
+    container_name: zuulservice
+    restart: always
+    volumes:
+      - $PWD/var/lib/docker/mydockertext/springcloudComposetest/zuulservice
+    ports:
+      - "8764:8764"
+    command: java -Djava.security.egd=file:/dev/./urandom -jar servicezuul-0.0.1-snapshot.jar app.jar
+    depends_on:
+      - register-center
+      - config-center
+    links:
+      - register-center:eurekaservice
+      - config-center:configservice
